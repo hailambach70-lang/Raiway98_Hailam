@@ -301,7 +301,13 @@ SELECT * FROM `Account` WHERE 'D%o';
 DELETE FROM Exam WHERE CreateDate < '2019/12/20'; 
 
 -- Câu 13:xóa tất cả các question có nội dung bắt đầu bằng từ "câu hỏi" 
+DELETE FROM Question WHERE Content LIKE '%Câu_hỏi_';
 
+-- Câu 14:update thông tin của account có id = 5 thành tên "Nguyễn Bá Lộc" và email thành loc.nguyenba@vti.com.vn
+UPDATE `Account` SET FullName = 'NguyenBaLoc', Email = 'loc.nguyenba@vti.com.vn' WHERE AccountID = 5;
+
+-- Câu 15:update account có id = 5 sẽ thuộc group có id = 4
+UPDATE `Account` SET PositionID = 4 WHERE AccountID = 5;
 
 
 
