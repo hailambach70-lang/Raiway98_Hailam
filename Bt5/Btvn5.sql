@@ -251,84 +251,38 @@ VALUES 					(1,5),
 						(9,9), 
 						(10,8); 
                         
--- Câu 1:viết lệnh để lấy ra danh sách nhân viên và thông tin phòng ban của họ
-SELECT * FROM `Account`;
-SELECT * FROM Department;
-
-SELECT * FROM `Account` a
-INNER JOIN Department d On a.DepartmentID = d.DepartmentID;
-
--- Câu 2:viết lệnh để lấy ra thông tin các account được tạo sau ngày 20/12/2010
-SELECT * FROM `Account`;
-SELECT * FROM Department;
-
-SELECT * FROM `Account` a
-WHERE CreateDate > '2020-12-20';
-
--- Câu 3:viết lệnh để lấy ra tất cả các developer  
-SELECT * FROM `Account` a
-INNER JOIN 	Position d ON a.PositionID = d.PositionID
-WHERE d.PositionName = 'Dev';
-
-
--- Câu 4:viết lệnh để lấy ra danh sách các phòng ban có > 3 nhân viên
--- B1: xác định các bảng dữ liệu liên quan: Account, Department
--- B2: xác định bảng dữ liệu gốc
-
-SELECT a.DepartmentID, d.DepartmentName, COUNT(AccountID) `MEMBER` FROM `Account` a
-INNER JOIN Department d On a.DepartmentID = d.DepartmentID
-GROUP BY DepartmentID
-HAVING COUNT(AccountID) >= 3;
-                      
--- Câu 5:viết lệnh để lấy ra danh sách câu hỏi được sử dụng trong đề thi nhiều nhất 
-SELECT * FROM Question;
-SELECT * FROM ExamQuestion;
-
-WITH cte_Amount_Question AS (
-	SELECT COUNT(*) AS Amount FROM ExamQuestion GROUP BY QuestionID 
+  -- Câu 1:tạo view có chứa danh sách nhân viên thuộc phòng ban sale                      
+                        
+CREATE OR REPLACE VIEW vw AS 
+	SELECT a.AccountID ,a.Username ,a.FullName ,a.DepartmentID , d.DepartmentName FROM account a
+    INNER JOIN department d ON a.departmentID = d.departmentID 
+    Where departmentName = 'Sale';
+DROP VIEW vw;    
+SELECT * FROM vw ;                        
+                        
+-- Câu 2:tạo view có chứa thông tin các account tham gia vào nhiều group nhất                        
+                        
+CREATE OR REPLACE VIEW vw_groupAccount AS
+WITH cte_maxAccount AS(
+SELECT count(*) AS Amount FROM groupaccount ga
+GROUP BY ga.AccountID
 )
-SELECT ex.QuestionID, q.Content, COUNT(*) FROM ExamQuestion ex
-INNER JOIN Question q ON q.QuestionID = ex.QuestionID
-GROUP BY QuestionID
-HAVING COUNT(*) = (SELECT MAX(Amount) FROM cte_Amount_Question);
+SELECT ga.AccountID, a.FullName, COUNT(*) Amount FROM groupaccount ga
+INNER JOIN account a ON a.AccountID = ga.AccountID
+GROUP BY ga.AccountID
+HAVING COUNT(*) = (SELECT max(Amount) FROM cte_maxAccount);                        
+DROP VIEW vw_groupaccount;
+SELECT * FROM vw_groupaccount;                        
+                        
+-- Câu 3:tạo view có chứa câu hỏi có những content quá dài (content quá 300 từ được coi là quá dài) và xóa nó đi                        
+                        
+CREATE OR REPLACE VIEW vw_content_300 AS
+SELECT * FROM question
+WHERE length(Content)>300;
 
--- Câu 6:thống kê mỗi category Question được sử dụng trong bao nhiêu Question
+SELECT * FROM vw_content_300;
+DROP VIEW vw_content_300;                       
 
-SELECT a.CategoryName, COUNT(d.CategoryID) FROM CategoryQuestion a
-INNER JOIN Question d ON a.CategoryID = d.CategoryID
-GROUP BY d.CategoryID;
+-- Câu 4:tạo view có chứa danh sách các phòng ban có nhiều nhân viên nhất 
 
--- Câu 8
-SELECT * FROM Question;
-SELECT * FROM Answer;
-
-WITH cte_Max_Answer_Question AS (
-	SELECT COUNT(*) AS Max_Answer_Question FROM Answer GROUP BY QuestionID
-)
-SELECT q.QuestionID, q.Content, COUNT(*) AS Answer_Question FROM Question q
-INNER JOIN Answer a ON q.QuestionID = a.QuestionID
-GROUP BY QuestionID
-HAVING COUNT(*) = (SELECT MAX(Max_Answer_Question) FROM cte_Max_Answer_Question);
-
-SET sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));
-
--- Câu 12
-
-SELECT q.Content, q.CreateDate,cq.CategoryName, a.FullName, an.Content FROM Question q
-JOIN CategoryQuestion cq ON cq.CategoryID=q.CategoryID
-JOIN TypeQuestion tq ON tq.TypeID=q.TypeID
-JOIN Account a ON q.CreatorID=a.AccountID
-JOIN Answer an ON an.QuestionID=q.QuestionID;      
-
-                  
-
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
+                       
