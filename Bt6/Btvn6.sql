@@ -250,58 +250,38 @@ VALUES 					(1,5),
 						(8,10), 
 						(9,9), 
 						(10,8); 
+-- Câu 4:tạo store để trả ra id của type question có nhiều câu hỏi nhất                        
                         
-  -- Câu 1:tạo view có chứa danh sách nhân viên thuộc phòng ban sale                      
-                        
-CREATE OR REPLACE VIEW vw AS 
-	SELECT a.AccountID ,a.Username ,a.FullName ,a.DepartmentID , d.DepartmentName FROM account a
-    INNER JOIN department d ON a.departmentID = d.departmentID 
-    Where departmentName = 'Sale';
-DROP VIEW vw;    
-SELECT * FROM vw ;                        
-                        
--- Câu 2:tạo view có chứa thông tin các account tham gia vào nhiều group nhất                        
-                        
-CREATE OR REPLACE VIEW vw_groupAccount AS
-WITH cte_maxAccount AS(
-SELECT count(*) AS Amount FROM groupaccount ga
-GROUP BY ga.AccountID
-)
-SELECT ga.AccountID, a.FullName, COUNT(*) Amount FROM groupaccount ga
-INNER JOIN account a ON a.AccountID = ga.AccountID
-GROUP BY ga.AccountID
-HAVING COUNT(*) = (SELECT max(Amount) FROM cte_maxAccount);                        
-DROP VIEW vw_groupaccount;
-SELECT * FROM vw_groupaccount;                        
-                        
--- Câu 3:tạo view có chứa câu hỏi có những content quá dài (content quá 300 từ được coi là quá dài) và xóa nó đi                        
-                        
-CREATE OR REPLACE VIEW vw_content_300 AS
-SELECT * FROM question
-WHERE length(Content)>300;
+DROP PROCEDURE IF EXISTS sp_getMaxTypeQuestion;
 
-SELECT * FROM vw_content_300;
-DROP VIEW vw_content_300;                       
+DELIMITER $$
+CREATE PROCEDURE sp_getMaxTypeQuestion()
+	BEGIN
+		WITH cte_amount_TypeQuestion AS (
+			SELECT count(*) AS amount FROM question q
+            GROUP BY q.TypeID
+	)
+    SELECT q.TypeId, tq.TypeName, count(*) Amount FROM question q
+    INNER JOIN typequestion tq ON q.TypeID = tq.TypeID
+    GROUP BY q.TypeID
+    HAVING count(*) = (SELECT max(amount) FROM cte_amount_TypeQuestion);
+	END$$
+DELIMITER ;
 
--- Câu 4:tạo view có chứa danh sách các phòng ban có nhiều nhân viên nhất 
-
-CREATE OR REPLACE VIEW vw_Department_with_max_account AS
-WITH cte_Department_with_max_account AS (
-	SELECT COUNT(*) AS max_account FROM `Account` GROUP BY DepartmentID
-)
-SELECT a.AccountID ,a.Username ,a.FullName ,a.DepartmentID , d.DepartmentName, COUNT(*) AS max_account FROM Department d
-INNER JOIN `Account` a ON d.DepartmentID = a.DepartmentID
-GROUP BY DepartmentID
-HAVING COUNT(*) = (SELECT MAX(max_account) FROM cte_Department_with_max_account);     
-                
-SELECT * FROM vw_Department_with_max_account;
-DROP VIEW vw_Department_with_max_account;  
-
--- Câu 5:tạo view có chứa tất các các câu hỏi do user họ Nguyễn tạo
-
-CREATE OR REPLACE VIEW vw_UserNguyễn_create AS
-SELECT d.QuestionID, d.Content, a.Username, a.FullName AS Question_Creator FROM Question d
-INNER JOIN `Account` a ON d.CreatorID = a.AccountID
-WHERE a.Username LIKE 'Nguyen%';
-SELECT * FROM vw_UserNguyễn_create;
-DROP VIEW vw_UserNguyễn_create;                     
+CALL sp_getMaxTypeQuestion();                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
