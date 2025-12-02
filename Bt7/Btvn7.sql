@@ -250,56 +250,11 @@ VALUES 					(1,5),
 						(8,10), 
 						(9,9), 
 						(10,8); 
--- Câu 4:tạo store để trả ra id của type question có nhiều câu hỏi nhất                        
                         
-DROP PROCEDURE IF EXISTS sp_getMaxTypeQuestion;
-
-DELIMITER $$
-CREATE PROCEDURE sp_getMaxTypeQuestion()
-	BEGIN
-		WITH cte_amount_TypeQuestion AS (
-			SELECT count(*) AS amount FROM question q
-            GROUP BY q.TypeID
-	)
-    SELECT q.TypeId, tq.TypeName, count(*) Amount FROM question q
-    INNER JOIN typequestion tq ON q.TypeID = tq.TypeID
-    GROUP BY q.TypeID
-    HAVING count(*) = (SELECT max(amount) FROM cte_amount_TypeQuestion);
-	END$$
-DELIMITER ;
-
-CALL sp_getMaxTypeQuestion();                        
+-- Câu 1:tạo trigger không cho phép người dùng nhập vào Group có ngày tạo trước 1 năm trước                        
                         
--- Câu 1:tạo store để người dùng nhập vào tên phòng ban và in ra tất cả các account thuộc phòng ban đó
                         
-DROP PROCEDURE IF EXISTS sp_Insert_Department_Return_Acc;
-DELIMITER $$
-CREATE PROCEDURE sp_Insert_Department_Return_Acc(IN in_DepartmentName NVARCHAR(50))
-BEGIN
-	SELECT a.AccountID, a.FullName, d.DepartmentName FROM `account` a
-	INNER JOIN department d ON d.DepartmentID = a.DepartmentID
-	WHERE d.DepartmentName = in_DepartmentName;
-END$$
-DELIMITER ;
-
-Call sp_Insert_Department_Return_Acc('Marketing');
-
--- Câu 2:tạo store để in ra số lượng account trong mỗi group    	                    
                         
-DROP PROCEDURE IF EXISTS sp_Acc_In_Group;
-DELIMITER $$
-CREATE PROCEDURE sp_Acc_In_Group() 
-	BEGIN
-		SELECT b.GroupID, d.GroupName, COUNT(*) AS MemberOfGroup FROM GroupAccount b
-        INNER JOIN `Account` a ON b.AccountID = a.AccountID
-        INNER JOIN `Group` d ON d.GroupID = b.GroupID
-        GROUP BY GroupID;
-	END$$
-DELIMITER ;
-
-CALL sp_Acc_In_Group;                        
-                        
--- Câu 3:tạo store để thống kê mỗi type question có bao nhiêu question được tạo trong tháng hiện tại                        
                         
                         
                         
